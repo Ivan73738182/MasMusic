@@ -4,6 +4,9 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,6 +19,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var infoText: TextView
     private lateinit var songsList: RecyclerView
+    private lateinit var miniPlayer: LinearLayout
+    private lateinit var currentSong: TextView
+    private lateinit var playPauseBtn: Button
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -34,6 +40,20 @@ class MainActivity : AppCompatActivity() {
         infoText = findViewById(R.id.infoText)
         songsList = findViewById(R.id.songsList)
         songsList.layoutManager = LinearLayoutManager(this)
+
+        miniPlayer = findViewById(R.id.miniPlayer)
+        currentSong = findViewById(R.id.currentSong)
+        playPauseBtn = findViewById(R.id.playPauseBtn)
+
+        playPauseBtn.setOnClickListener {
+            if (PlayerManager.isPlaying()) {
+                PlayerManager.pause()
+                playPauseBtn.text = "▶"
+            } else {
+                PlayerManager.resume()
+                playPauseBtn.text = "⏸"
+            }
+        }
 
         checkAndRequestPermission()
     }
@@ -60,7 +80,9 @@ class MainActivity : AppCompatActivity() {
         val adapter = SongAdapter(songs) { song ->
             try {
                 PlayerManager.play(song.path)
-                Toast.makeText(this, "▶ Играет: ${song.title}", Toast.LENGTH_SHORT).show()
+                currentSong.text = song.title
+                playPauseBtn.text = "⏸"
+                miniPlayer.visibility = View.VISIBLE
             } catch (e: Exception) {
                 Toast.makeText(this, "Не удалось воспроизвести: ${e.message}", Toast.LENGTH_LONG).show()
             }

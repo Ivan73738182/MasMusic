@@ -33,4 +33,39 @@
         android:paddingHorizontal="8dp"
         android:clipToPadding="false" />
 
+    <!-- Мини-плеер внизу -->
+    <LinearLayout
+        android:id="@+id/miniPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#1E1E2E"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/currentSong"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Не играет"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <Button
+            android:id="@+id/playPauseBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⏸"
+            android:textSize="22sp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#6A1B9A"
+            android:minWidth="0dp"
+            android:paddingHorizontal="20dp" />
+
+    </LinearLayout>
+
 </LinearLayout>

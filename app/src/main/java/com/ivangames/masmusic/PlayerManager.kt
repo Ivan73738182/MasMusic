@@ -14,6 +14,18 @@ object PlayerManager {
         }
     }
 
+    fun pause() {
+        mediaPlayer?.let {
+            if (it.isPlaying) it.pause()
+        }
+    }
+
+    fun resume() {
+        mediaPlayer?.let {
+            if (!it.isPlaying) it.start()
+        }
+    }
+
     fun stop() {
         mediaPlayer?.let {
             if (it.isPlaying) it.stop()
