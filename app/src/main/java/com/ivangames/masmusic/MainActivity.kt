@@ -57,10 +57,11 @@ class MainActivity : AppCompatActivity() {
         val songs = MusicScanner.scanMusic(this)
         infoText.text = "Найдено песен: ${songs.size}"
 
-        val adapter = SongAdapter(songs) { song ->
-            Toast.makeText(this, "Ты выбрал: ${song.title}", Toast.LENGTH_SHORT).show()
-            // Воспроизведение добавим на следующем шаге
-        }
-        songsList.adapter = adapter
+val adapter = SongAdapter(songs) { song ->
+    try {
+        PlayerManager.play(song.path)
+        Toast.makeText(this, "▶ Играет: ${song.title}", Toast.LENGTH_SHORT).show()
+    } catch (e: Exception) {
+        Toast.makeText(this, "Не удалось воспроизвести: ${e.message}", Toast.LENGTH_LONG).show()
     }
 }
