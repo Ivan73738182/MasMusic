@@ -13,6 +13,26 @@ object PlayerManager {
 
     var onSongChanged: ((Song) -> Unit)? = null
 
+private val favorites = mutableSetOf<Long>()
+
+fun toggleFavorite(song: Song): Boolean {
+    return if (favorites.contains(song.id)) {
+        favorites.remove(song.id)
+        false
+    } else {
+        favorites.add(song.id)
+        true
+    }
+}
+
+fun isFavorite(song: Song): Boolean = favorites.contains(song.id)
+
+fun getFavorites(playlist: List<Song>): List<Song> =
+    playlist.filter { favorites.contains(it.id) }
+
+fun removeFromFavorites(song: Song) {
+    favorites.remove(song.id)
+}
     fun setPlaylist(songs: List<Song>) {
         playlist = songs
     }

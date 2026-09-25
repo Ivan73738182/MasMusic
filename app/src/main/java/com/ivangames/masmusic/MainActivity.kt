@@ -114,25 +114,33 @@ val adapter = SongAdapter(
             Toast.makeText(this, "Ошибка: ${e.message}", Toast.LENGTH_LONG).show()
         }
     },
-    onMenu = { song, view ->
-        val popup = android.widget.PopupMenu(this, view)
-        popup.menu.add("❤️ В избранное")
-        popup.menu.add("🗑 Удалить из списка")
-        popup.setOnMenuItemClickListener { item ->
-            when (item.title.toString()) {
-                "❤️ В избранное" -> {
-                    Toast.makeText(this, "Добавлено: ${song.title}", Toast.LENGTH_SHORT).show()
-                    true
-                }
-                "🗑 Удалить из списка" -> {
-                    Toast.makeText(this, "Удалено: ${song.title}", Toast.LENGTH_SHORT).show()
-                    true
-                }
-                else -> false
+onMenu = { song, view ->
+    val popup = android.widget.PopupMenu(this, view)
+    val favText = if (PlayerManager.isFavorite(song)) "💔 Убрать из избранного"
+                  else "❤️ В избранное"
+    popup.menu.add(favText)
+    popup.menu.add("🗑 Удалить из списка")
+    popup.setOnMenuItemClickListener { item ->
+        when (item.title.toString()) {
+            "❤️ В избранное" -> {
+                PlayerManager.toggleFavorite(song)
+                Toast.makeText(this, "❤️ Добавлено: ${song.title}", Toast.LENGTH_SHORT).show()
+                true
             }
+            "💔 Убрать из избранного" -> {
+                PlayerManager.toggleFavorite(song)
+                Toast.makeText(this, "💔 Убрано: ${song.title}", Toast.LENGTH_SHORT).show()
+                true
+            }
+            "🗑 Удалить из списка" -> {
+                Toast.makeText(this, "Удалено: ${song.title}", Toast.LENGTH_SHORT).show()
+                true
+            }
+            else -> false
         }
-        popup.show()
     }
+    popup.show()
+}
 )
 songsList.adapter = adapter
 }
