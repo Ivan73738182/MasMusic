@@ -4,9 +4,12 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,15 +25,27 @@ class MainActivity : AppCompatActivity() {
     private lateinit var miniPlayer: LinearLayout
     private lateinit var currentSong: TextView
     private lateinit var playPauseBtn: Button
+    private lateinit var prevBtn: Button
+    private lateinit var nextBtn: Button
+    private lateinit var miniProgress: ProgressBar
+
+    private val handler = Handler(Looper.getMainLooper())
+    private val updateProgress = object : Runnable {
+        override fun run() {
+            val dur = PlayerManager.getDuration()
+            if (dur > 0) {
+                val pos = PlayerManager.getCurrentPosition()
+                miniProgress.progress = (pos * 100 / dur)
+            }
+            handler.postDelayed(this, 1000)
+        }
+    }
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
-        if (isGranted) {
-            loadMusic()
-        } else {
-            Toast.makeText(this, "Без разрешения музыку не найти 😢", Toast.LENGTH_LONG).show()
-        }
+        if (isGranted) loadMusic()
+        else Toast.makeText(this, "Без разрешения музыку не найти 😢", Toast.LENGTH_LONG).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,10 +55,12 @@ class MainActivity : AppCompatActivity() {
         infoText = findViewById(R.id.infoText)
         songsList = findViewById(R.id.songsList)
         songsList.layoutManager = LinearLayoutManager(this)
-
         miniPlayer = findViewById(R.id.miniPlayer)
         currentSong = findViewById(R.id.currentSong)
         playPauseBtn = findViewById(R.id.playPauseBtn)
+        prevBtn = findViewById(R.id.prevBtn)
+        nextBtn = findViewById(R.id.nextBtn)
+        miniProgress = findViewById(R.id.miniProgress)
 
         playPauseBtn.setOnClickListener {
             if (PlayerManager.isPlaying()) {
@@ -55,6 +72,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        nextBtn.setOnClickListener { PlayerManager.next() }
+        prevBtn.setOnClickListener { PlayerManager.prev() }
+
+        PlayerManager.onSongChanged = { song ->
+            currentSong.text = song.title
+            playPauseBtn.text = "⏸"
+        }
+
+        handler.post(updateProgress)
         checkAndRequestPermission()
     }
 
@@ -64,9 +90,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             Manifest.permission.READ_EXTERNAL_STORAGE
         }
-
-        if (ContextCompat.checkSelfPermission(this, permission)
-            == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
             loadMusic()
         } else {
             requestPermissionLauncher.launch(permission)
@@ -76,17 +100,23 @@ class MainActivity : AppCompatActivity() {
     private fun loadMusic() {
         val songs = MusicScanner.scanMusic(this)
         infoText.text = "Найдено песен: ${songs.size}"
+        PlayerManager.setPlaylist(songs)
 
         val adapter = SongAdapter(songs) { song ->
             try {
-                PlayerManager.play(song.path)
+                PlayerManager.play(song)
                 currentSong.text = song.title
                 playPauseBtn.text = "⏸"
                 miniPlayer.visibility = View.VISIBLE
             } catch (e: Exception) {
-                Toast.makeText(this, "Не удалось воспроизвести: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Ошибка: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
         songsList.adapter = adapter
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(updateProgress)
     }
 }

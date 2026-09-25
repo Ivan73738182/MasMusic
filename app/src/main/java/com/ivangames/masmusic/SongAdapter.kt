@@ -1,8 +1,10 @@
 package com.ivangames.masmusic
 
+import android.content.ContentUris
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
@@ -12,6 +14,7 @@ class SongAdapter(
 ) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
 
     class SongViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val cover: ImageView = view.findViewById(R.id.songCover)
         val title: TextView = view.findViewById(R.id.songTitle)
         val artist: TextView = view.findViewById(R.id.songArtist)
     }
@@ -26,6 +29,17 @@ class SongAdapter(
         val song = songs[position]
         holder.title.text = song.title
         holder.artist.text = song.artist
+
+        // Обложка из MediaStore
+        val albumUri = ContentUris.withAppendedId(
+            android.net.Uri.parse("content://media/external/audio/albumart"),
+            song.albumId
+        )
+        holder.cover.setImageURI(albumUri)
+        if (holder.cover.drawable == null) {
+            holder.cover.setImageResource(android.R.drawable.ic_media_play)
+        }
+
         holder.itemView.setOnClickListener { onClick(song) }
     }
 
