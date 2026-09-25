@@ -9,10 +9,13 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var infoText: TextView
+    private lateinit var songsList: RecyclerView
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -29,6 +32,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         infoText = findViewById(R.id.infoText)
+        songsList = findViewById(R.id.songsList)
+        songsList.layoutManager = LinearLayoutManager(this)
 
         checkAndRequestPermission()
     }
@@ -51,6 +56,11 @@ class MainActivity : AppCompatActivity() {
     private fun loadMusic() {
         val songs = MusicScanner.scanMusic(this)
         infoText.text = "Найдено песен: ${songs.size}"
-        Toast.makeText(this, "Найдено: ${songs.size}", Toast.LENGTH_SHORT).show()
+
+        val adapter = SongAdapter(songs) { song ->
+            Toast.makeText(this, "Ты выбрал: ${song.title}", Toast.LENGTH_SHORT).show()
+            // Воспроизведение добавим на следующем шаге
+        }
+        songsList.adapter = adapter
     }
 }
