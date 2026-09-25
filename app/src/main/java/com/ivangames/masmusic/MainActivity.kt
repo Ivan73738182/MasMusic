@@ -65,3 +65,4 @@ val adapter = SongAdapter(songs) { song ->
         Toast.makeText(this, "Не удалось воспроизвести: ${e.message}", Toast.LENGTH_LONG).show()
     }
 }
+}
