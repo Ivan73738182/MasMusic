@@ -1,4 +1,4 @@
-kimport java.util.Properties
+import java.util.Properties
 import java.io.FileInputStream
 
 plugins {
