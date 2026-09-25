@@ -102,19 +102,39 @@ class MainActivity : AppCompatActivity() {
         infoText.text = "Найдено песен: ${songs.size}"
         PlayerManager.setPlaylist(songs)
 
-        val adapter = SongAdapter(songs) { song ->
-            try {
-                PlayerManager.play(song)
-                currentSong.text = song.title
-                playPauseBtn.text = "⏸"
-                miniPlayer.visibility = View.VISIBLE
-            } catch (e: Exception) {
-                Toast.makeText(this, "Ошибка: ${e.message}", Toast.LENGTH_LONG).show()
+val adapter = SongAdapter(
+    songs,
+    onClick = { song ->
+        try {
+            PlayerManager.play(song)
+            currentSong.text = song.title
+            playPauseBtn.text = "⏸"
+            miniPlayer.visibility = View.VISIBLE
+        } catch (e: Exception) {
+            Toast.makeText(this, "Ошибка: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    },
+    onMenu = { song, view ->
+        val popup = android.widget.PopupMenu(this, view)
+        popup.menu.add("❤️ В избранное")
+        popup.menu.add("🗑 Удалить из списка")
+        popup.setOnMenuItemClickListener { item ->
+            when (item.title.toString()) {
+                "❤️ В избранное" -> {
+                    Toast.makeText(this, "Добавлено: ${song.title}", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                "🗑 Удалить из списка" -> {
+                    Toast.makeText(this, "Удалено: ${song.title}", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                else -> false
             }
         }
-        songsList.adapter = adapter
+        popup.show()
     }
-
+)
+songsList.adapter = adapter
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(updateProgress)
