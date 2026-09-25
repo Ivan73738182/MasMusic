@@ -135,6 +135,8 @@ val adapter = SongAdapter(
     }
 )
 songsList.adapter = adapter
+}
+
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(updateProgress)
